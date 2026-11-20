@@ -5,8 +5,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from utils.datasets import letterbox
-from utils.general import non_max_suppression, make_divisible, scale_coords
+from detect_wrapper.utils.datasets import letterbox
+from detect_wrapper.utils.general import non_max_suppression, make_divisible, scale_coords
 
 
 def autopad(k, p=None):  # kernel, padding
