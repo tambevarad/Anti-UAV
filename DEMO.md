@@ -1,89 +1,51 @@
-# Anti-UAV Tracking Demo
+# Run the Anti-UAV Demo
 
-Real-time UAV tracking using RGB-Thermal (RGBT) fusion with DroneDetection and KCF-style tracking.
+These steps run the bundled sample video with the detector and tracker in `Codes/`.
 
-## Project Structure
-
-```
-Anti-UAV/
-├── Codes/                          # Core implementation
-│   ├── detect_wrapper/            # Detection module (YOLOv5)
-│   ├── tracking_wrapper/          # Tracking module (KCF)
-│   └── demo_detect_track_fixed.py # Main demo script
-├── anti_uav_jittor/               # Jittor implementations (reference)
-├── dataset/                        # Anti-UAV-RGBT dataset
-│   ├── test/                      # 91 test videos
-│   ├── train/                     # Training videos
-│   └── val/                       # Validation videos
-├── results/                        # Tracking results (predictions)
-├── evaluate_anti_uav_rgbt.py      # Evaluation script (precision/recall/F1)
-└── README.md                       # Main documentation
-```
-
-## Quick Start
-
-### 1. Run Demo on Sample Video
+## 1. Open a terminal in the repo
 
 ```bash
-cd Codes
-python demo_detect_track_fixed.py
+cd /home/varad/utari-ais-computer-vision/Anti-UAV
 ```
 
-This runs tracking on a sample video with visualization.
+If the repo is in a different folder, use that folder instead.
 
-### 2. Evaluate on Anti-UAV-RGBT Dataset
+## 2. Create and activate a virtual environment
+
+Skip the create command if you already have a Python 3.8 environment named `venv` in the repo.
 
 ```bash
-
-# Activate venv
+python3.8 -m venv venv
 source venv/bin/activate
-
-# Evaluate all test videos
-python evaluate_anti_uav_rgbt.py
-
-# Or with custom paths
-python evaluate_anti_uav_rgbt.py \
-    --dataset-root ./dataset \
-    --results-root ./results \
-    --subset test \
-    --modality infrared
 ```
 
-## Dataset Format
+The prompt should now show `(venv)`. Install the demo packages into this environment:
 
-The Anti-UAV-RGBT dataset structure:
-
-```
-dataset/test/video_name/
-├── infrared.json      # GT annotations (thermal modality)
-├── infrared.mp4       # Thermal video
-├── visible.json       # GT annotations (RGB modality)
-└── visible.mp4        # RGB video
+```bash
+python -m pip install --upgrade pip
+python -m pip install torch==2.4.1 torchvision==0.19.1 --index-url https://download.pytorch.org/whl/cpu
+python -m pip install "opencv-python<4.12" numpy==1.24.4 Pillow==10.4.0 matplotlib==3.7.5 scipy==1.10.1 numba==0.58.1 PyYAML tqdm
 ```
 
-Each JSON contains:
-- `gt_rect`: List of [x, y, w, h] bounding boxes
-- `exist`: List of 0/1 indicating frame validity
+These commands install the CPU version of PyTorch. A CUDA GPU is not required, but CPU tracking is slower.
 
-## Expected Results
+## 3. Run the sample
 
-`evaluate_anti_uav_rgbt.py` prints per-video and overall metrics:
+Run this from the repo root, with the virtual environment active:
 
-- True/False Positives/Negatives (TP/FP/FN/TN)
-- Precision, Recall, F1, Accuracy
+```bash
+python Codes/demo_detect_track_fixed.py --device cpu
+```
 
-## Key Files
+The demo reads `Codes/testvideo/testvideo/n16.mp4` and loads `Codes/detect_wrapper/weights/best.pt`. The sample video and model checkpoint are large local assets and are not included in this code branch; provide them at those paths before running. It opens a window showing the video and boxes, and prints detection/tracking boxes and timing in the terminal. Let the video finish, or press `Ctrl+C` to stop it early. A desktop display is needed for the OpenCV window.
 
-- `demo_detect_track_fixed.py` - Run tracking on videos
-- `evaluate_anti_uav_rgbt.py` - Evaluate predictions (precision/recall/F1)
-- Prediction format: `results/video_name.txt` (x y w h, one per line)
+## Troubleshooting
 
-## Dependencies
+- `No module named PIL`, `torch`, or `cv2`: activate `venv` and install the packages from step 2 in that same terminal.
+- `Video not found` or `Weights not found`: check that both bundled paths above exist.
+- The demo is slow: CPU inference works but can take several minutes for the full video.
+- OpenCV cannot open a window: run from a desktop session rather than a headless terminal.
 
-- Python 3.8+
-- PyTorch
-- OpenCV
-- Numba
-- YOLOv5
+## Next Steps
 
-See `venv/` for installed packages.
+The sample demo is separate from dataset evaluation. For tracking and evaluation scripts, see the main [README](README.md) and the top-level `track_*.py` and `evaluate_*.py` files.
